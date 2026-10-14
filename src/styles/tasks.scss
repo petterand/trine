@@ -1,0 +1,118 @@
+@use './variables' as *;
+
+.task-item-row {
+  background-color: $bg-card;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  @include subtle-transition;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+
+  &:hover {
+    border-color: $border-medium;
+    background-color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+  }
+
+  &.completed {
+    opacity: 0.65;
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+
+    .task-title {
+      text-decoration: line-through;
+      color: $text-muted;
+    }
+  }
+
+  .custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid #cbd5e1;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-top: 2px;
+    flex-shrink: 0;
+    @include subtle-transition;
+
+    &:hover {
+      border-color: $color-primary;
+      background: rgba(37, 99, 235, 0.06);
+    }
+
+    &.checked {
+      background-color: $color-success;
+      border-color: $color-success;
+      color: #ffffff;
+    }
+  }
+
+  .priority-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 8px;
+
+    &.urgent { background-color: $color-urgent; }
+    &.high { background-color: $color-high; }
+    &.medium { background-color: $color-medium; }
+    &.low { background-color: $color-low; }
+  }
+}
+
+.priority-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &.urgent {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+  }
+  &.high {
+    background-color: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+  }
+  &.medium {
+    background-color: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+  &.low {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+  }
+}
+
+.subtask-progress-bar {
+  height: 4px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 6px;
+
+  .fill {
+    height: 100%;
+    background-color: $color-primary;
+    border-radius: 2px;
+    @include subtle-transition;
+  }
+}

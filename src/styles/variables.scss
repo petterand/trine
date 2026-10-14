@@ -1,0 +1,57 @@
+// SCSS Design Tokens & Variables for Trine Desktop (White/Gray with Blue Primary)
+$bg-app: #f8fafc;
+$bg-sidebar: #ffffff;
+$bg-surface: #ffffff;
+$bg-surface-hover: #f1f5f9;
+$bg-card: #ffffff;
+$bg-input: #ffffff;
+
+$border-subtle: #e2e8f0;
+$border-medium: #cbd5e1;
+$border-accent: rgba(37, 99, 235, 0.3);
+
+$text-primary: #0f172a;
+$text-secondary: #475569;
+$text-muted: #64748b;
+
+$color-primary: #2563eb;
+$color-primary-hover: #1d4ed8;
+$color-urgent: #ef4444;
+$color-high: #ea580c;
+$color-medium: #d97706;
+$color-low: #2563eb;
+$color-success: #16a34a;
+
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 12px;
+$radius-xl: 16px;
+
+@mixin glass-panel {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $border-subtle;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+}
+
+@mixin subtle-transition {
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@mixin custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}

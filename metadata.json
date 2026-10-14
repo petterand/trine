@@ -1,0 +1,6 @@
+{
+  "name": "ChronosTask - Tauri Todo & Recurring Reminders",
+  "description": "Desktop-grade Todo app built with Tauri, React, TypeScript, and SCSS featuring recurring hourly reminders and local JSON file persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

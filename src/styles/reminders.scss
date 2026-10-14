@@ -1,0 +1,128 @@
+@use './variables' as *;
+
+.recurring-hour-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+
+  .clock-icon {
+    opacity: 0.85;
+  }
+}
+
+.hour-chip-btn {
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  @include subtle-transition;
+
+  &:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #94a3b8;
+  }
+
+  &.selected {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.25);
+  }
+}
+
+.day-chip-btn {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  text-transform: uppercase;
+  @include subtle-transition;
+
+  &:hover {
+    color: #0f172a;
+    border-color: #94a3b8;
+  }
+
+  &.selected {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #1d4ed8;
+  }
+}
+
+.reminder-alert-floating {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  z-index: 100;
+  @include glass-panel;
+  border-radius: $radius-lg;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 20px 30px rgba(15, 23, 42, 0.12), 0 0 20px rgba(37, 99, 235, 0.15);
+  padding: 16px 18px;
+  animation: slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(20px) scale(0.97);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+  }
+}
+
+.timeline-hour-slot {
+  border-left: 2px solid #e2e8f0;
+  padding-left: 14px;
+  margin-left: 8px;
+  position: relative;
+  padding-bottom: 16px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 2px solid #cbd5e1;
+  }
+
+  &.is-current-hour {
+    border-left-color: $color-primary;
+
+    &::before {
+      background: $color-primary;
+      border-color: #ffffff;
+      box-shadow: 0 0 8px rgba(37, 99, 235, 0.5);
+    }
+  }
+}
