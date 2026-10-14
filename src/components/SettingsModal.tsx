@@ -10,7 +10,10 @@ export const SettingsModal: React.FC = () => {
     updateSettings,
     testReminderChime,
     isTauri,
-    filePath
+    filePath,
+    activeAlerts,
+    addTestAlerts,
+    clearAllAlerts
   } = useApp();
 
   if (!isSettingsModalOpen) return null;
@@ -154,6 +157,115 @@ export const SettingsModal: React.FC = () => {
             </div>
             <div className="text-[11px] text-slate-500">
               Runtime: <span className="text-blue-700 font-medium">{isTauri ? 'Native Tauri Desktop App' : 'Browser Web Sandbox (with File System Access API & export)'}</span>
+            </div>
+          </div>
+
+          {/* macOS Dock Badging & Preview */}
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-red-50 text-red-600">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                    <span>macOS Dock Notification Badge</span>
+                    <span className="text-[10px] px-1.5 py-0.2 bg-red-100 text-red-700 rounded-full font-mono font-bold">
+                      Slack Style
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Displays red count badge on macOS Dock icon. Shows <strong>9+</strong> if over 9 alerts.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* macOS Dock Visual Preview */}
+            <div className="p-3 bg-gradient-to-b from-slate-100 to-slate-200/90 rounded-xl border border-slate-300/80 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {/* Simulated macOS Dock Icon */}
+                <div className="relative p-1.5 bg-white/60 backdrop-blur-md rounded-2xl border border-white/80 shadow-md">
+                  <img
+                    src="/src/assets/images/trine_app_icon_1791999108987.jpg"
+                    alt="macOS Dock Icon Preview"
+                    className="w-12 h-12 rounded-xl object-cover shadow-sm"
+                    referrerPolicy="no-referrer"
+                  />
+                  {activeAlerts.length > 0 && (
+                    <span
+                      className={`absolute -top-1.5 -right-2 flex items-center justify-center font-bold font-sans tabular-nums text-white bg-red-600 rounded-full border-2 border-white shadow-md shadow-red-600/40 ${
+                        activeAlerts.length > 9 ? 'text-[11px] min-w-[24px] h-[20px] px-1.5' : 'text-xs min-w-[20px] h-[20px] px-1'
+                      }`}
+                    >
+                      {activeAlerts.length > 9 ? '9+' : activeAlerts.length}
+                    </span>
+                  )}
+                  {/* Subtle dock reflection indicator */}
+                  <div className="w-1 h-1 rounded-full bg-slate-600 mx-auto mt-1" />
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold text-slate-800">
+                    Live Dock Badge: <span className="font-mono text-red-600 font-bold">{activeAlerts.length > 0 ? (activeAlerts.length > 9 ? '9+' : activeAlerts.length) : 'None (Idle)'}</span>
+                  </div>
+                  <div className="text-[10.5px] text-slate-500 mt-0.5">
+                    {activeAlerts.length === 0
+                      ? 'No unchecked reminders. Dock icon is clean.'
+                      : `${activeAlerts.length} unchecked reminder${activeAlerts.length > 1 ? 's' : ''} currently signaling attention.`}
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick test buttons */}
+              <div className="flex flex-col gap-1 items-end">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => addTestAlerts(1)}
+                    className="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 rounded text-[10.5px] text-slate-700 font-medium transition-colors shadow-xs"
+                    title="Add 1 reminder alert to test badge"
+                  >
+                    +1 Alert
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => addTestAlerts(12)}
+                    className="px-2 py-1 bg-red-50 hover:bg-red-100 border border-red-200 rounded text-[10.5px] text-red-700 font-medium transition-colors shadow-xs"
+                    title="Add 12 reminder alerts to test 9+ rule"
+                  >
+                    Test 9+
+                  </button>
+                </div>
+                {activeAlerts.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearAllAlerts}
+                    className="text-[10px] text-slate-500 hover:text-slate-800 underline transition-colors"
+                  >
+                    Clear All Alerts
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* About Trine & App Icon Emblem */}
+          <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 flex items-center gap-3.5">
+            <img
+              src="/src/assets/images/trine_app_icon_1791999108987.jpg"
+              alt="Trine Emblem"
+              className="w-12 h-12 rounded-xl shadow-md border border-blue-200 object-cover shrink-0"
+              referrerPolicy="no-referrer"
+            />
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-slate-900 text-xs">Trine Desktop Icon</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">T + 3</span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed mt-0.5">
+                Minimalist Scandinavian design combining the letter <strong className="text-blue-700">T</strong> with the number <strong className="text-blue-700">3</strong>, celebrating the Norwegian name <em>Trine</em> (triad / threefold / tre).
+              </p>
             </div>
           </div>
         </div>

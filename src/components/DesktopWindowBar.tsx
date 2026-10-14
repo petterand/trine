@@ -1,6 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { HardDrive, CheckCircle2, RefreshCw, Bell, Volume2, VolumeX } from 'lucide-react';
+import { AppIconBadge } from './AppIconBadge';
 
 export const DesktopWindowBar: React.FC = () => {
   const {
@@ -26,6 +27,7 @@ export const DesktopWindowBar: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <AppIconBadge size="sm" />
           <span className="text-sm font-bold tracking-tight text-slate-900 font-heading">
             Trine
           </span>

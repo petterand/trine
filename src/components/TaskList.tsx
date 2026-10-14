@@ -12,8 +12,36 @@ import {
   ChevronRight,
   Plus,
   Bell,
-  CheckCircle2
+  CheckCircle2,
+  Search,
+  X,
+  Tag
 } from 'lucide-react';
+
+const HighlightMatch: React.FC<{ text: string; query: string }> = ({ text, query }) => {
+  if (!query || !query.trim()) return <>{text}</>;
+  const cleanQ = query.trim().replace(/^#+/, '').replace(/^(tag|tags|title):/, '').trim();
+  if (!cleanQ) return <>{text}</>;
+
+  try {
+    const parts = text.split(new RegExp(`(${cleanQ.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')})`, 'gi'));
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === cleanQ.toLowerCase() ? (
+            <mark key={i} className="bg-amber-200/90 text-amber-950 px-1 py-0.5 rounded text-inherit font-inherit">
+              {part}
+            </mark>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  } catch {
+    return <>{text}</>;
+  }
+};
 
 export const TaskList: React.FC = () => {
   const {
@@ -28,7 +56,11 @@ export const TaskList: React.FC = () => {
     deleteSubTask,
     addTodo,
     currentFilter,
-    selectedTag
+    selectedTag,
+    searchQuery,
+    setSearchQuery,
+    searchScope,
+    setSearchScope
   } = useApp();
 
   // Quick Add State
@@ -119,26 +151,85 @@ export const TaskList: React.FC = () => {
         </div>
       </form>
 
+      {/* Active Search & Filter Indicator */}
+      {searchQuery.trim() && (
+        <div className="mb-4 px-3.5 py-2.5 bg-blue-50/70 border border-blue-200/70 rounded-xl flex items-center justify-between text-xs text-blue-900 shadow-xs">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Search className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <span>
+              Real-time search {searchScope === 'tag' ? 'in tags' : searchScope === 'title' ? 'in titles' : 'across tasks'}:{' '}
+              <strong className="font-semibold text-blue-950 bg-blue-100/70 px-1.5 py-0.5 rounded">
+                "{searchQuery}"
+              </strong>
+            </span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-200/70 text-blue-800 font-bold font-mono-numbers">
+              {filteredTodos.length} {filteredTodos.length === 1 ? 'task found' : 'tasks found'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="text-xs text-blue-700 hover:text-blue-900 font-semibold hover:underline flex items-center gap-1"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Clear Filter</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Task Rows */}
       {filteredTodos.length === 0 ? (
         <div className="text-center py-16 px-4 bg-white border border-dashed border-slate-200 rounded-2xl shadow-sm">
-          <CheckCircle2 className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-800 font-heading">No tasks found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
-            {currentFilter === 'completed'
-              ? 'Completed tasks will be archived and shown here.'
-              : 'Add your first task above, configure recurring reminders, and save locally.'}
-          </p>
-          <button
-            onClick={() => {
-              setEditingTodo(null);
-              setIsTaskModalOpen(true);
-            }}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-2 shadow-sm"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Create New Task</span>
-          </button>
+          {searchQuery.trim() ? (
+            <>
+              <Search className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+              <h3 className="text-base font-semibold text-slate-800 font-heading">
+                No tasks matching "{searchQuery}"
+              </h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
+                {searchScope === 'tag'
+                  ? `No tasks have tags containing "${searchQuery}". Try selecting another tag or switching to All.`
+                  : searchScope === 'title'
+                  ? `No task titles contain "${searchQuery}". Try searching tags or descriptions.`
+                  : `Check your spelling, try another keyword, or clear your search filter.`}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSearchScope('all');
+                }}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-2xs"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Clear Search Filter</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="w-10 h-10 text-slate-400 mx-auto mb-3" />
+              <h3 className="text-base font-semibold text-slate-800 font-heading">No tasks found</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
+                {currentFilter === 'completed'
+                  ? 'Completed tasks will be archived and shown here.'
+                  : 'Add your first task above, configure recurring reminders, and save locally.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingTodo(null);
+                  setIsTaskModalOpen(true);
+                }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-2 shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create New Task</span>
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-2.5">
@@ -178,7 +269,7 @@ export const TaskList: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="task-title text-sm font-semibold text-slate-900 font-heading">
-                      {todo.title}
+                      <HighlightMatch text={todo.title} query={searchQuery} />
                     </span>
 
                     {/* Priority Badge */}
@@ -208,7 +299,7 @@ export const TaskList: React.FC = () => {
                   {/* Description */}
                   {todo.description && (
                     <p className="text-xs text-slate-600 line-clamp-2 mb-2 leading-relaxed">
-                      {todo.description}
+                      <HighlightMatch text={todo.description} query={searchQuery} />
                     </p>
                   )}
 
@@ -227,14 +318,29 @@ export const TaskList: React.FC = () => {
                     {/* Tags */}
                     {todo.tags && todo.tags.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        {todo.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium border border-slate-200"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
+                        {todo.tags.map((tag) => {
+                          const cleanQuery = searchQuery.trim().toLowerCase().replace(/^#+/, '').replace(/^(tag|tags):/, '');
+                          const isTagMatch = cleanQuery && tag.toLowerCase().includes(cleanQuery);
+                          return (
+                            <button
+                              key={tag}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSearchQuery(`#${tag}`);
+                                setSearchScope('tag');
+                              }}
+                              className={`text-[11px] px-2 py-0.5 rounded font-medium border transition-all cursor-pointer ${
+                                isTagMatch
+                                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200 hover:border-slate-300'
+                              }`}
+                              title={`Filter by tag #${tag}`}
+                            >
+                              #<HighlightMatch text={tag} query={searchQuery} />
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
 

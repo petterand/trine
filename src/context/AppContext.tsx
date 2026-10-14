@@ -23,6 +23,7 @@ import {
 } from '../services/tauriBridge';
 import { soundService } from '../services/soundService';
 import { sendDesktopNotification, requestNotificationPermission } from '../services/notificationService';
+import { updateAppBadge } from '../services/badgeService';
 
 interface AppContextType {
   // Data
@@ -40,6 +41,8 @@ interface AppContextType {
   setSelectedTag: (tag: string | null) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  searchScope: 'all' | 'title' | 'tag';
+  setSearchScope: (scope: 'all' | 'title' | 'tag') => void;
   activeViewTab: 'tasks' | 'routines' | 'timeline';
   setActiveViewTab: (tab: 'tasks' | 'routines' | 'timeline') => void;
 
@@ -79,6 +82,8 @@ interface AppContextType {
   snoozeAlert: (alertId: string, minutes: number) => void;
   completeTodoFromAlert: (todoId: string) => void;
   testReminderChime: () => void;
+  addTestAlerts: (count: number) => void;
+  clearAllAlerts: () => void;
 
   // Storage / File Operations
   forceSave: () => Promise<void>;
@@ -116,6 +121,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [currentFilter, setCurrentFilter] = useState<ViewFilter>('all');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchScope, setSearchScope] = useState<'all' | 'title' | 'tag'>('all');
   const [activeViewTab, setActiveViewTab] = useState<'tasks' | 'routines' | 'timeline'>('tasks');
 
   // Modals
@@ -128,6 +134,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Active alerts
   const [activeAlerts, setActiveAlerts] = useState<ActiveAlert[]>([]);
+
+  // Automatically update macOS Dock badge, W3C Web Badge, dynamic favicon, and window title
+  useEffect(() => {
+    updateAppBadge(activeAlerts.length);
+  }, [activeAlerts.length]);
 
   // Prevent multiple saves on rapid change
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -414,6 +425,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setActiveAlerts((prev) => [...prev, testAlert]);
     sendDesktopNotification('Test Reminder Alert', 'Audio and desktop notification are working properly.');
+  };
+
+  const addTestAlerts = (count: number) => {
+    const newItems: ActiveAlert[] = Array.from({ length: count }).map((_, idx) => ({
+      id: `test-alert-${Date.now()}-${idx}`,
+      type: 'general',
+      itemId: `test-item-${idx}`,
+      title: `Unchecked Reminder #${idx + 1}`,
+      description: 'Pending recurring alert awaiting your attention in macOS Dock',
+      priority: idx % 2 === 0 ? 'urgent' : 'high',
+      targetHour: `${String(9 + (idx % 12)).padStart(2, '0')}:00`,
+      timestamp: Date.now() - idx * 1000
+    }));
+    setActiveAlerts((prev) => [...newItems, ...prev]);
+  };
+
+  const clearAllAlerts = () => {
+    setActiveAlerts([]);
   };
 
   // Todo CRUD Operations
@@ -747,19 +776,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       result = result.filter((t) => t.tags && t.tags.includes(selectedTag));
     }
 
-    // Search query
+    // Search query & real-time filter by title, tag, or content
     if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(
-        (t) =>
-          t.title.toLowerCase().includes(q) ||
-          (t.description && t.description.toLowerCase().includes(q)) ||
-          t.tags.some((tag) => tag.toLowerCase().includes(q))
-      );
+      const rawQuery = searchQuery.trim().toLowerCase();
+      let mode = searchScope;
+      let cleanQuery = rawQuery;
+
+      if (rawQuery.startsWith('tag:') || rawQuery.startsWith('tags:')) {
+        mode = 'tag';
+        cleanQuery = rawQuery.replace(/^(tag|tags):/, '').trim();
+      } else if (rawQuery.startsWith('#')) {
+        mode = 'tag';
+        cleanQuery = rawQuery.replace(/^#+/, '').trim();
+      } else if (rawQuery.startsWith('title:')) {
+        mode = 'title';
+        cleanQuery = rawQuery.replace(/^title:/, '').trim();
+      }
+
+      if (cleanQuery) {
+        result = result.filter((t) => {
+          const matchTitle = t.title.toLowerCase().includes(cleanQuery);
+          const matchDesc = t.description ? t.description.toLowerCase().includes(cleanQuery) : false;
+          const matchTag = t.tags ? t.tags.some((tag) => tag.toLowerCase().includes(cleanQuery)) : false;
+          const matchSubtask = t.subtasks ? t.subtasks.some((sub) => sub.title.toLowerCase().includes(cleanQuery)) : false;
+
+          if (mode === 'title') {
+            return matchTitle;
+          }
+          if (mode === 'tag') {
+            return matchTag;
+          }
+          return matchTitle || matchTag || matchDesc || matchSubtask;
+        });
+      }
     }
 
     return result;
-  }, [appData.todos, currentFilter, selectedTag, searchQuery]);
+  }, [appData.todos, currentFilter, selectedTag, searchQuery, searchScope]);
 
   // Derived all tags
   const allTags = useMemo(() => {
@@ -784,6 +837,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setSelectedTag,
         searchQuery,
         setSearchQuery,
+        searchScope,
+        setSearchScope,
         activeViewTab,
         setActiveViewTab,
         isTaskModalOpen,
@@ -815,6 +870,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         snoozeAlert,
         completeTodoFromAlert,
         testReminderChime,
+        addTestAlerts,
+        clearAllAlerts,
         forceSave,
         openJsonFile,
         exportDataFile,

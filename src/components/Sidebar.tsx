@@ -16,6 +16,7 @@ import {
   Layers,
   Plus
 } from 'lucide-react';
+import { AppIconBadge } from './AppIconBadge';
 
 export const Sidebar: React.FC = () => {
   const {
@@ -53,6 +54,24 @@ export const Sidebar: React.FC = () => {
     <aside className="chronos-sidebar flex flex-col justify-between py-3 bg-white border-r border-slate-200">
       {/* Top Section: View Switcher & Task Navigation */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
+        {/* App Branding & Icon */}
+        <div className="px-3.5 pt-1 pb-3 mb-2.5 flex items-center gap-3 border-b border-slate-100">
+          <AppIconBadge size="md" />
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm font-bold tracking-tight text-slate-900 font-heading leading-tight">
+                Trine
+              </span>
+              <span className="text-[10px] px-1 rounded bg-blue-50 text-blue-700 font-mono font-semibold border border-blue-200/60">
+                T·3
+              </span>
+            </div>
+            <div className="text-[10.5px] text-slate-500 truncate leading-tight mt-0.5">
+              Todo & Recurring Alarms
+            </div>
+          </div>
+        </div>
+
         {/* Action Button: Create Task */}
         <div className="px-3 mb-3">
           <button
