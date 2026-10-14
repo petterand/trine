@@ -143,10 +143,6 @@ export const TopBar: React.FC = () => {
     if (activeViewTab === 'timeline') {
       return 'Real-time schedule of hourly recurring reminders for today';
     }
-    if (searchQuery.trim()) {
-      const scopeLabel = searchScope === 'title' ? 'in titles' : searchScope === 'tag' ? 'in tags' : 'across all fields';
-      return `${filteredTodos.length} ${filteredTodos.length === 1 ? 'task' : 'tasks'} matching "${searchQuery}" (${scopeLabel})`;
-    }
     return `${filteredTodos.length} ${filteredTodos.length === 1 ? 'task' : 'tasks'} found`;
   };
 
@@ -161,16 +157,33 @@ export const TopBar: React.FC = () => {
 
   return (
     <div className="h-16 px-8 border-b border-slate-200 flex items-center justify-between gap-6 bg-white shrink-0 relative z-20">
-      {/* Left: View Title & Live Task Count */}
-      <div className="min-w-[190px]">
-        <h1 className="text-lg font-bold text-slate-900 font-heading tracking-tight flex items-center gap-2">
+      {/* Left: View Title & Live Task Count (Fixed width to keep search bar size stable) */}
+      <div className="w-64 shrink-0 min-w-0">
+        <h1 className="text-lg font-bold text-slate-900 font-heading tracking-tight flex items-center gap-2 truncate">
           {getTitle()}
         </h1>
-        <p className="text-xs text-slate-500 font-mono-numbers">{getSubtitle()}</p>
+        <div className="flex items-center gap-1.5 mt-0.5 min-w-0">
+          {activeViewTab === 'tasks' ? (
+            <span
+              className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium font-mono-numbers border transition-colors shrink-0 ${
+                searchQuery.trim()
+                  ? 'bg-blue-50 text-blue-700 border-blue-200/70'
+                  : 'bg-slate-100 text-slate-600 border-slate-200/60'
+              }`}
+            >
+              <span className="font-semibold text-slate-900">{filteredTodos.length}</span>
+              <span>{filteredTodos.length === 1 ? 'task' : 'tasks'} found</span>
+            </span>
+          ) : (
+            <p className="text-xs text-slate-500 truncate" title={getSubtitle()}>
+              {getSubtitle()}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Middle: Global Real-Time Search Bar */}
-      <div className="flex-1 max-w-xl relative" ref={containerRef}>
+      <div className="flex-1 max-w-xl min-w-0 relative" ref={containerRef}>
         <div
           className={`relative flex items-center rounded-xl transition-all duration-150 border bg-slate-50 ${
             isFocused
@@ -239,28 +252,17 @@ export const TopBar: React.FC = () => {
             </button>
           </div>
 
-          {/* Match Counter Badge or Keyboard Shortcut Hint */}
+          {/* Clear Button or Keyboard Shortcut Hint */}
           <div className="flex items-center gap-1.5 pr-2.5">
             {searchQuery ? (
-              <>
-                <span
-                  className={`text-[11px] font-medium font-mono-numbers px-2 py-0.5 rounded-md ${
-                    filteredTodos.length > 0
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200/60'
-                      : 'bg-rose-50 text-rose-600 border border-rose-200/60'
-                  }`}
-                >
-                  {filteredTodos.length} {filteredTodos.length === 1 ? 'match' : 'matches'}
-                </span>
-                <button
-                  type="button"
-                  onClick={clearSearch}
-                  className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-                  title="Clear search (Esc)"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                title="Clear search (Esc)"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             ) : (
               <kbd className="hidden sm:inline-flex items-center gap-0.5 text-[10px] text-slate-400 bg-slate-100 border border-slate-200 rounded px-1.5 py-0.5 font-mono shadow-2xs">
                 {shortcutKey}
@@ -430,7 +432,7 @@ export const TopBar: React.FC = () => {
       </div>
 
       {/* Right: Quick Action CTAs */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {activeViewTab === 'routines' ? (
           <button
             onClick={() => {
